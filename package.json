@@ -1,0 +1,25 @@
+{
+  "name": "2048games",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "http://feiniao111.github.io/2048edu",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "loadash": "^1.0.0",
+    "lodash": "^4.17.11",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "0.9.x"
+  },
+  "devDependencies": {
+    "gh-pages": "^2.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  }
+}

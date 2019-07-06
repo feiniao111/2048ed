@@ -1,0 +1,86 @@
+.game-container {
+  margin-top: 40px;
+  position: relative;
+  padding: 15px;
+  cursor: default;
+  -webkit-touch-callout: none;
+  -ms-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -ms-touch-action: none;
+  touch-action: none;
+  background: #bbada0;
+  border-radius: 6px;
+  width: 500px;
+  height: 500px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 500px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 520px) {
+  .game-container {
+    margin-top: 17px;
+    position: relative;
+    padding: 10px;
+    cursor: default;
+    -webkit-touch-callout: none;
+    -ms-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -ms-touch-action: none;
+    touch-action: none;
+    background: #bbada0;
+    border-radius: 6px;
+    width: 280px;
+    height: 280px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  .container {
+    width: 280px;
+    margin: 0 auto;
+  }
+}
+
+.operation {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.arrow-up {
+  display: inline-block;
+  background: url(./assets/img/arrow_up.png);
+  width: 30px;
+  height: 30px;
+}
+
+.arrow-down {
+  display: inline-block;
+  background: url(./assets/img/arrow_down.png);
+  width: 30px;
+  height: 30px;
+}
+
+.arrow-left {
+  display: inline-block;
+  background: url(./assets/img/arrow_left.png);
+  width: 30px;
+  height: 30px;
+}
+
+.arrow-right {
+  display: inline-block;
+  background: url(./assets/img/arrow_right.png);
+  width: 30px;
+  height: 30px;
+}
