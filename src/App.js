@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import ChessBoard from './components/chessBoard'
 import Cubes from './components/cubes'
-import {CHESS_BOARD_LENGTH, ChessValueSystem} from './conf/config';
+import {CHESS_BOARD_LENGTH, ChessValueSystem, APPRAISE} from './conf/config';
 let _ = require('lodash');
 import './App.css'
 
@@ -29,6 +29,12 @@ let initialBlankCubes = function(len) {
             arr.push('')
         }
     }
+    // return [ // mock
+    //     [{value: '预备班', id: 0},{value: '高中', id: 1},{value: '幼儿园', id: 2},{value: '预备班', id: 3}],
+    //     [{value: '高中', id: 4},{value: '小学', id: 5},{value: '大学', id: 6},{value: '小学', id: 7}],
+    //     [{value: '预备班', id: 8},{value: '博士', id: 9},{value: '小学', id: 10},{value: '幼儿园', id: 11}],
+    //     [{value: '幼儿园', id: 12},{value: '高中', id: 13},{value: '幼儿园', id: 14},{value: '小学', id: 15}]
+    // ]
     return arrs;
 }
 
@@ -37,7 +43,7 @@ let cmpArrays = function(arr1, arr2) {
         return false;
     }
     for (let i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) {
+        if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) {
             return false;
         }
     }
@@ -48,16 +54,22 @@ class Game extends PureComponent {
     constructor(props) {
         super(props)
         this.state = {
-            cubes: initialBlankCubes(CHESS_BOARD_LENGTH),
-            mergedGrids: {},
-            newGrids: {},
-            highestEducation: ''
+            /**
+             * 棋盘所有格子的学历信息，4*4 二维数组, 元素取值有三种：
+             * '' ———————— 无学历， 
+             * {value: '幼儿园', id: 15} —————— 格子上放置幼儿园
+             *  [{value: '幼儿园', id: 13},{value: '幼儿园', id: 14},{value: '预备班', id: 15}] —————— 格子上放置预备班，合并得到
+             * */ 
+            cubes: initialBlankCubes(CHESS_BOARD_LENGTH), 
+            mergedGrids: {}, // 发生合并的格子 一维位置, 比如{15: 1}
+            newGrids: {}, // 新出现的格子，一维位置，比如 {0: 1}
+            highestEducation: '', // 最高学历
+            idPool: _.range(0, CHESS_BOARD_LENGTH * CHESS_BOARD_LENGTH) // id池，只有push和pop操作
         }
     }
 
     handleMoveRight() {
-        let tmpCubes = this.state.cubes;
-        // let tmpCubes = this.state.cubes.slice(0);
+        let tmpCubes = this.state.cubes.slice(0);
         let tmpMergedGrids = {};
         let tmpHighestEducation = this.state.highestEducation;
         let len = tmpCubes.length;
@@ -73,16 +85,16 @@ class Game extends PureComponent {
                         tmpArr.push(arr[j]);
                     } else {
                         if (!isTailMerged) {
-                            if (tmpArr[tmpArr.length - 1] === arr[j]) {
-                                let oldVal = tmpArr.pop();
-                                let mergeValue = system.chess_merge(oldVal, arr[j]);
-                                tmpArr.push(mergeValue);
+                            if (tmpArr[tmpArr.length - 1].value === arr[j].value) {
+                                let oldEle = tmpArr.pop();
+                                let mergeValue = system.chess_merge(oldEle.value, oldEle.value);
                                 if (!system.eduCompare(tmpHighestEducation, mergeValue)) {
                                     tmpHighestEducation = mergeValue;
                                 }
                                 isTailMerged = true;
-                                // 记录合并的位置
-                                tmpMergedGrids[row * arr.length + arr.length - tmpArr.length] = 1; // 因为tmpArr翻转过来，，才是改行移动、合并的数据
+                                let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
+                                tmpMergedGrids[mergeId] = 1; 
+                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -109,8 +121,7 @@ class Game extends PureComponent {
     }
 
     handleMoveLeft() {
-        let tmpCubes = this.state.cubes;
-        // let tmpCubes = this.state.cubes.slice(0);
+        let tmpCubes = this.state.cubes.slice(0);
         let tmpMergedGrids = {};
         let tmpHighestEducation = this.state.highestEducation;
         let len = tmpCubes.length;
@@ -126,16 +137,17 @@ class Game extends PureComponent {
                         tmpArr.push(arr[j]);
                     } else {
                         if (!isTailMerged) {
-                            if (tmpArr[tmpArr.length - 1] === arr[j]) {
-                                let oldVal = tmpArr.pop();
-                                let mergeValue = system.chess_merge(oldVal, arr[j]);
-                                tmpArr.push(mergeValue);
+                            if (tmpArr[tmpArr.length - 1].value === arr[j].value) {
+                                let oldEle = tmpArr.pop();
+                                let mergeValue = system.chess_merge(oldEle.value, arr[j].value);
+                                
                                 if (!system.eduCompare(tmpHighestEducation, mergeValue)) {
                                     tmpHighestEducation = mergeValue;
                                 }
                                 isTailMerged = true;
-                                // 记录合并的位置
-                                tmpMergedGrids[row * arr.length + tmpArr.length - 1] = 1; 
+                                let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
+                                tmpMergedGrids[mergeId] = 1; 
+                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -161,8 +173,7 @@ class Game extends PureComponent {
     }
 
     handleMoveUp() {
-        let tmpCubes = this.state.cubes;
-        // let tmpCubes = this.state.cubes.slice(0);
+        let tmpCubes = this.state.cubes.slice(0);
         let tmpMergedGrids = {};
         let tmpHighestEducation = this.state.highestEducation;
         let len = tmpCubes.length;
@@ -178,16 +189,16 @@ class Game extends PureComponent {
                         tmpArr.push(arr[j]);
                     } else {
                         if (!isTailMerged) {
-                            if (tmpArr[tmpArr.length - 1] === arr[j]) {
-                                let oldVal = tmpArr.pop();
-                                let mergeValue = system.chess_merge(oldVal, arr[j]);
-                                tmpArr.push(mergeValue);
+                            if (tmpArr[tmpArr.length - 1].value === arr[j].value) {
+                                let oldEle = tmpArr.pop();
+                                let mergeValue = system.chess_merge(oldEle.value, arr[j].value);
+                                let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
                                 if (!system.eduCompare(tmpHighestEducation, mergeValue)) {
                                     tmpHighestEducation = mergeValue;
                                 }
                                 isTailMerged = true;
-                                // 记录合并的位置
-                                tmpMergedGrids[(tmpArr.length - 1) * arr.length + col] = 1; 
+                                tmpMergedGrids[mergeId] = 1; 
+                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -232,16 +243,17 @@ class Game extends PureComponent {
                         tmpArr.push(arr[j]);
                     } else {
                         if (!isTailMerged) {
-                            if (tmpArr[tmpArr.length - 1] === arr[j]) {
-                                let oldVal = tmpArr.pop();
-                                let mergeValue = system.chess_merge(oldVal, arr[j]);
-                                tmpArr.push(mergeValue);
+                            if (tmpArr[tmpArr.length - 1].value === arr[j].value) {
+                                let oldEle = tmpArr.pop();
+                                let mergeValue = system.chess_merge(oldEle.value, arr[j].value);
+                                let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
                                 if (!system.eduCompare(tmpHighestEducation, mergeValue)) {
                                     tmpHighestEducation = mergeValue;
                                 }
                                 isTailMerged = true;
                                 // 记录合并的位置
-                                tmpMergedGrids[(arr.length - tmpArr.length) * arr.length + col] = 1; 
+                                tmpMergedGrids[mergeId] = 1; 
+                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -271,34 +283,56 @@ class Game extends PureComponent {
 
     afterMove(isMoved, tmpCubes, tmpMergedGrids, tmpHighestEducation) {
         if (isMoved) {
-            // 先展示合并动效
+            // 先展示移动、合并动效
             this.setState({
-                cubes: tmpCubes,
                 mergedGrids: tmpMergedGrids,
+                cubes: tmpCubes,
                 highestEducation: tmpHighestEducation
             }, () => {
-                // 再展示新的cube动效
-                let [cubes, newGrids, highestEducation] = this.chooseRandGid(tmpCubes)
+                // 移除合并样式
                 setTimeout(() => {
+                    let adjCubes = this.rmMergeCube(tmpCubes)
                     this.setState({
-                        cubes: cubes,
-                        mergedGrids: {},
-                        newGrids: newGrids,
-                        highestEducation: highestEducation > this.state.highestEducation ? highestEducation : this.state.highestEducation
+                        cubes: adjCubes
                     }, () => {
+                        // 再展示新的cube动效
+                        let [cubes, newGrids, highestEducation] = this.chooseRandGrid(adjCubes)
                         setTimeout(() => {
                             this.setState({
-                                newGrids: {}
+                                newGrids: newGrids,
+                                cubes: cubes,
+                                highestEducation: highestEducation > this.state.highestEducation ? highestEducation : this.state.highestEducation
+                            }, () => {
+                                // 移除新的cube样式
+                                this.setState({
+                                    mergedGrids: {},
+                                    newGrids: {}
+                                })
+
+                                // 如果达到‘博士后’，则游戏结束
+                                if (this.state.highestEducation === '博士后') {
+                                    layer.open({
+                                        content: '恭喜你获得人类最高的博士后学位，真的太厉害了，祖国发光发热就靠你了~',
+                                        btn: ['再来一次', '去炫耀'],
+                                        yes: function(index){
+                                            location.reload();
+                                            layer.close(index);
+                                        },
+                                        shadeClose: false,
+                                        fixed: false,
+                                        top: -400
+                                    });
+                                }
                             })
-                        }, 200)
+                        }, 250)
                     })
-                }, 200)
+                }, 50)
             })
         } else {
             let isMovable = this.checkMovable(this.state.cubes);
             if (!isMovable) {
                 layer.open({
-                    content: '恭喜你，获得最高学历：' + this.state.highestEducation,
+                    content: '您获得最高学历：' + this.state.highestEducation + '， 太棒了!!',
                     btn: ['再挑战一次', '不要'],
                     yes: function(index){
                         location.reload();
@@ -312,30 +346,54 @@ class Game extends PureComponent {
         }
     }
 
-    chooseRandGid(cubes) {
+    rmMergeCube(cubes) {
+        let self = this;
+        let newCubes = cubes.map((row, index) => {
+            return row.map((ele, indexy) => {
+                if (ele === '') {
+                    return ele;
+                } else if (ele instanceof Array) {
+                    // 返回第一个元素，回收第二、三个元素的id到id池
+                    self.state.idPool.push(ele[1].id);
+                    self.state.idPool.push(ele[2].id);
+                    return ele[0]
+                } else if (ele instanceof Object) {
+                    return ele;
+                } 
+            })
+        })
+        return newCubes;
+    }
+
+    /**
+     * 在所有空格中随机取一个赋值
+     * @param {*} cubes 
+     */
+    chooseRandGrid(cubes) {
         let blankGrids = this.genBlankGrids(cubes);
         let len = blankGrids.length;
         let rd = _.random(0, len - 1);
-        let initvalue = _.random(0, 1) ? 2 : 4;
+        let initvalue = system.parse(_.random(0, 1) ? 2 : 4); // 随机值为幼儿园或者预备班
         let tmpblankGrids = blankGrids.slice(0);
-        let gid = tmpblankGrids.splice(rd, 1)[0];
-        let gidX = gid.split('-')[0] - 1;
-        let gidY = gid.split('-')[1] - 1;
+        let grid = tmpblankGrids.splice(rd, 1)[0];
+        let gridX = grid.split('-')[0] - 1;
+        let gridY = grid.split('-')[1] - 1;
         let tmpCubes = cubes;
         // let tmpCubes = cubes.slice();
-        tmpCubes[gidX][gidY] = system.parse(initvalue);
+        let gridId = this.state.idPool.pop();
+        tmpCubes[gridX][gridY] = {value: initvalue, id: gridId};
         let highestEducation = this.state.highestEducation;
-        if (!system.eduCompare(highestEducation, tmpCubes[gidX][gidY])) {
-            highestEducation = tmpCubes[gidX][gidY];
+        if (!system.eduCompare(highestEducation, initvalue)) {
+            highestEducation = initvalue;
         }
         let newGrids = {}
-        newGrids[gidX * cubes.length + gidY] = 1
+        newGrids[gridId] = 1
         return [tmpCubes, newGrids, highestEducation]
     }
 
     // 检查是否还可以移动
     checkMovable(cubes) {
-        if (cubes.flat().indexOf('') > 0) {
+        if (cubes.flat().indexOf('') >= 0) {
             return true;
         }
         // 遍历行
@@ -343,7 +401,7 @@ class Game extends PureComponent {
             let index = 0;
             let arr = cubes[row];
             while(index + 1 < arr.length) {
-                if (arr[index] === arr[index + 1]) {
+                if (arr[index].value === arr[index + 1].value) {
                     return true;
                 }
                 index++;
@@ -355,7 +413,7 @@ class Game extends PureComponent {
             let index = 0;
             let arr = cubes.map(row => row[col]);
             while(index + 1 < arr.length) {
-                if (arr[index] === arr[index + 1]) {
+                if (arr[index].value === arr[index + 1].value) {
                     return true;
                 }
                 index++;
@@ -364,18 +422,42 @@ class Game extends PureComponent {
         return false;
     }
 
-    isOver() {
-        if (this.state.cubes.flat().indexOf('') >= 0)
-        return false;
-    }
-
     componentDidMount() {
-        let [cubes, newGrids, highestEducation] = this.chooseRandGid(this.state.cubes)
+        // 随机在棋盘上生成一个学历
+        // mock
+        let [cubes, newGrids, highestEducation] = this.chooseRandGrid(this.state.cubes)
         this.setState({
             cubes: cubes,
             newGrids: newGrids,
             highestEducation: highestEducation
         })
+
+        // test
+        // layer.open({
+        //     content: '恭喜你，获得最高学历：' + this.state.highestEducation,
+        //     btn: ['再挑战一次', '不要'],
+        //     yes: function(index){
+        //         location.reload();
+        //         layer.close(index);
+        //     },
+        //     shadeClose: false,
+        //     fixed: false,
+        //     top: -400
+        // });
+
+        // if (true) {
+        //     layer.open({
+        //         content: '恭喜你获得博士后学位，真的太厉害了，祖国发光发热就靠你了~',
+        //         btn: ['再来一次', '去炫耀'],
+        //         yes: function(index){
+        //             location.reload();
+        //             layer.close(index);
+        //         },
+        //         shadeClose: false,
+        //         fixed: false,
+        //         top: -400
+        //     });
+        // }
     }
 
     genBlankGrids(cubes) {
@@ -395,7 +477,8 @@ class Game extends PureComponent {
             <div className="container">
                 <div className="heading">
                     <div className="best-container">{this.state.highestEducation}</div>
-                    <p className="wish-container"><i>学习也是生活，当认真对待</i></p>
+                    {/* <p className="wish-container"><i>学习也是生活，当认真对待</i></p> */}
+                    <p className="wish-container"><i>{ APPRAISE[this.state.highestEducation] }</i></p>
                 </div>
                 
                 <div className="game-container">
@@ -403,12 +486,12 @@ class Game extends PureComponent {
                     <Cubes cubes={this.state.cubes} mergedGrids={this.state.mergedGrids} newGrids={this.state.newGrids} />
                 </div>
                 <div className="operation">
-                    <div><i className="arrow-up" onClick={this.handleMoveUp.bind(this)}></i></div>
+                    <div><i className="arrow-up blink" onClick={this.handleMoveUp.bind(this)} style={{"marginBottom": "5px"}} ></i></div>
                     <div>
-                        <i className="arrow-left" onClick={this.handleMoveLeft.bind(this)} style={{"marginRight": "40px"}} ></i>
-                        <i className="arrow-right" onClick={this.handleMoveRight.bind(this)}></i>
+                        <i className="arrow-left blink" onClick={this.handleMoveLeft.bind(this)} style={{"marginRight": "50px"}} ></i>
+                        <i className="arrow-right blink" onClick={this.handleMoveRight.bind(this)}></i>
                     </div>
-                    <div><i className="arrow-down" onClick={this.handleMoveDown.bind(this)}></i></div>
+                    <div><i className="arrow-down blink" onClick={this.handleMoveDown.bind(this)} style={{"marginTop": "5px"}} ></i></div>
                 </div>
             </div>
         )

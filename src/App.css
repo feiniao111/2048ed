@@ -59,9 +59,25 @@
 
 .arrow-up {
   display: inline-block;
-  background: url(./assets/img/arrow_up.png);
+  background: url(./assets/img/arrow_up.png) no-repeat;
   width: 30px;
   height: 30px;
+}
+
+.blink {
+  animation:scaleout 2.5s infinite ease-in-out;
+}
+
+
+@keyframes scaleout {
+  0% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  } 100% {
+      transform: scale(1.1);
+      -webkit-transform: scale(1.1);
+      opacity: 0.5;
+    }
 }
 
 .arrow-down {

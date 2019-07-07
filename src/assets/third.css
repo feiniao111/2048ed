@@ -424,7 +424,7 @@ hr {
     text-align: center;
     font-weight: bold;
     z-index: 10;
-    font-size: 55px;
+    font-size: 25px;
 }
 
 .cube.cube-2 .cube-inner {
@@ -464,10 +464,12 @@ hr {
     color: #f9f6f2;
     background: #edcf72;
     box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2381), inset 0 0 0 1px rgba(255, 255, 255, 0.14286);
-    font-size: 45px;
+    /* font-size: 45px; */
+    font-size: 23px;
 }
 
-@media screen and (max-width: 520px) {
+/* @media screen and (max-width: 520px) { */
+@media screen and (max-width: 480px) {
     .cube.cube-128 .cube-inner {
         font-size: 23px;
     }
@@ -477,10 +479,12 @@ hr {
     color: #f9f6f2;
     background: #edcc61;
     box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.31746), inset 0 0 0 1px rgba(255, 255, 255, 0.19048);
-    font-size: 45px;
+    /* font-size: 45px; */
+    font-size: 23px;
 }
 
-@media screen and (max-width: 520px) {
+/* @media screen and (max-width: 520px) { */
+@media screen and (max-width: 480px) {
     .cube.cube-256 .cube-inner {
         font-size: 23px;
     }
@@ -490,10 +494,12 @@ hr {
     color: #f9f6f2;
     background: #edc850;
     box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.39683), inset 0 0 0 1px rgba(255, 255, 255, 0.2381);
-    font-size: 45px;
+    /* font-size: 25px; */
+    font-size: 23px;
 }
 
-@media screen and (max-width: 520px) {
+/* @media screen and (max-width: 520px) { */
+@media screen and (max-width: 480px) {
     .cube.cube-512 .cube-inner {
         font-size: 17px;
     }
@@ -506,7 +512,8 @@ hr {
     font-size: 35px;
 }
 
-@media screen and (max-width: 520px) {
+@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 520px) { */
     .cube.cube-1024 .cube-inner {
         font-size: 15px;
     }
@@ -519,7 +526,8 @@ hr {
     font-size: 35px;
 }
 
-@media screen and (max-width: 520px) {
+@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 520px) { */
     .cube.cube-2048 .cube-inner {
         font-size: 15px;
     }
@@ -531,7 +539,8 @@ hr {
     font-size: 30px;
 }
 
-@media screen and (max-width: 520px) {
+@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 520px) { */
     .cube.cube-super .cube-inner {
         font-size: 10px;
     }
@@ -694,7 +703,8 @@ hr {
     margin-top: 50px;
 }
 
-@media screen and (max-width: 520px) {
+@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 520px) { */
 
     html,
     body {
@@ -733,6 +743,7 @@ hr {
     .heading {
         margin-bottom: 10px;
         margin-top: 10px;
+        height: 84px;
     }
 
     .game-intro {
@@ -1430,9 +1441,21 @@ footer {
         line-height: 107px;
     }
 
+    .cube.cube-2 .cube-inner,
+    .cube.cube-4 .cube-inner {
+        font-size: 23px;
+    }
+
     h1.title {
         font-size: 74px;
         line-height: 66px;
+    }
+
+    .wish-container {
+        float: right;
+        font-family: cursive;
+        width: 315px;
+        margin-top: 10px;
     }
 }
 
@@ -1673,14 +1696,14 @@ footer {
     }
 
     .cube .cube-inner {
-        font-size: 53px;
+        font-size: 25px;
         line-height: 98px;
     }
 
     .cube-128 .cube-inner,
     .cube-256 .cube-inner,
     .cube-512 .cube-inner {
-        font-size: 43px !important;
+        font-size: 25px !important;
     }
 
     .cube-1024 .cube-inner,
