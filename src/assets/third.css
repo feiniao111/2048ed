@@ -1805,3 +1805,11 @@ footer {
         width: 100%;
     }
 }
+
+.layui-m-layerchild.invite .layui-m-layerbtn {
+    bottom: 0px;
+    position: absolute;
+}
+.layui-m-layerchild.invite .layui-m-layercont {
+    text-align: center;
+}

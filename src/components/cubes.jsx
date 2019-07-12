@@ -2,6 +2,13 @@ import React, { PureComponent } from 'react'
 import Cube from './cube'
 
 class Cubes extends PureComponent {
+    //你在父组件里面改变props传值的时候触发的函数
+	componentWillReceiveProps(){
+		console.log('父子组件传值，父组件里面改变了props的值触发的方法')
+    }
+    componentDidUpdate() {
+        console.log(11, this, 22)
+    }
     render() {
         // let flatCubes = this.props.cubes.flat()
         // const cubes = flatCubes.map((item, index) =>
@@ -15,7 +22,7 @@ class Cubes extends PureComponent {
         const renderItems = function(item, index, indexy) {
             if (item != '') {
                 if (item instanceof Array)  {
-                    item.map((aitem, indexz) => {
+                    return item.map((aitem, indexz) => {
                         return (<Cube value={aitem.value} locate={ (indexy + 1) + '-' + (index + 1) } 
                             key={aitem.id}
                             isMerge={self.props.mergedGrids[item.id]} 

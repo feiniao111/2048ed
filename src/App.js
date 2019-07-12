@@ -30,10 +30,10 @@ let initialBlankCubes = function(len) {
         }
     }
     // return [ // mock
-    //     [{value: '预备班', id: 0},{value: '高中', id: 1},{value: '幼儿园', id: 2},{value: '预备班', id: 3}],
-    //     [{value: '高中', id: 4},{value: '小学', id: 5},{value: '大学', id: 6},{value: '小学', id: 7}],
+    //     [{value: '预备班', id: 0},'',{value: '预备班', id: 2},{value: '预备班', id: 3}],
+    //     ['',{value: '小学', id: 5},{value: '大学', id: 6},{value: '小学', id: 7}],
     //     [{value: '预备班', id: 8},{value: '博士', id: 9},{value: '小学', id: 10},{value: '幼儿园', id: 11}],
-    //     [{value: '幼儿园', id: 12},{value: '高中', id: 13},{value: '幼儿园', id: 14},{value: '小学', id: 15}]
+    //     [{value: '预备班', id: 12},{value: '高中', id: 13},{value: '幼儿园', id: 14},{value: '小学', id: 15}]
     // ]
     return arrs;
 }
@@ -94,7 +94,7 @@ class Game extends PureComponent {
                                 isTailMerged = true;
                                 let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
                                 tmpMergedGrids[mergeId] = 1; 
-                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
+                                tmpArr.push([oldEle, arr[j], {value: mergeValue, id: mergeId}]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -147,7 +147,7 @@ class Game extends PureComponent {
                                 isTailMerged = true;
                                 let mergeId = this.state.idPool.pop(); // 从id池尾部取一个
                                 tmpMergedGrids[mergeId] = 1; 
-                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
+                                tmpArr.push([oldEle, arr[j], {value: mergeValue, id: mergeId}]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -198,7 +198,7 @@ class Game extends PureComponent {
                                 }
                                 isTailMerged = true;
                                 tmpMergedGrids[mergeId] = 1; 
-                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
+                                tmpArr.push([oldEle, arr[j], {value: mergeValue, id: mergeId}]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -253,7 +253,7 @@ class Game extends PureComponent {
                                 isTailMerged = true;
                                 // 记录合并的位置
                                 tmpMergedGrids[mergeId] = 1; 
-                                tmpArr.push([{value: mergeValue, id: mergeId}, oldEle, arr[j]]);
+                                tmpArr.push([oldEle, arr[j], {value: mergeValue, id: mergeId}]);
                             } else {
                                 tmpArr.push(arr[j]);
                             }
@@ -281,6 +281,10 @@ class Game extends PureComponent {
         this.afterMove(isMoved, tmpCubes, tmpMergedGrids, tmpHighestEducation);
     }
 
+    componentDidUpdate() {
+        console.log(11, this, 22)
+    }
+
     afterMove(isMoved, tmpCubes, tmpMergedGrids, tmpHighestEducation) {
         if (isMoved) {
             // 先展示移动、合并动效
@@ -303,30 +307,46 @@ class Game extends PureComponent {
                                 cubes: cubes,
                                 highestEducation: highestEducation > this.state.highestEducation ? highestEducation : this.state.highestEducation
                             }, () => {
-                                // 移除新的cube样式
-                                this.setState({
-                                    mergedGrids: {},
-                                    newGrids: {}
-                                })
+                                setTimeout(() => {
+                                    // 移除新的cube样式
+                                    this.setState({
+                                        mergedGrids: {},
+                                        newGrids: {}
+                                    })
 
-                                // 如果达到‘博士后’，则游戏结束
-                                if (this.state.highestEducation === '博士后') {
-                                    layer.open({
-                                        content: '恭喜你获得人类最高的博士后学位，真的太厉害了，祖国发光发热就靠你了~',
-                                        btn: ['再来一次', '去炫耀'],
-                                        yes: function(index){
-                                            location.reload();
-                                            layer.close(index);
-                                        },
-                                        shadeClose: false,
-                                        fixed: false,
-                                        top: -400
-                                    });
-                                }
+                                    // 如果达到‘博士后’，则游戏结束
+                                    if (this.state.highestEducation === '博士后') {
+                                        layer.open({
+                                            content: '恭喜你获得博士后学位，真的太厉害了，祖国发光发热就靠你了~',
+                                            btn: ['学霸请留步', '去炫耀'],
+                                            yes: function(index){
+                                                layer.open({
+                                                    type: 1,
+                                                    className : 'invite',
+                                                    shade:'background-color: rgba(0,0,0,0)',
+                                                    btn: ['再玩一次', '不要'],
+                                                    yes: function() {
+                                                        location.reload();
+                                                    },
+                                                    no: function(index) {
+                                                        layer.close(index);
+                                                    },
+                                                    shadeClose: true,
+                                                    content: '相信您对教育有很深的认识，对各阶段也有自己的体会，如果可以，传达您的见解，一起丰富内容库，给学生生涯留个纪念吧~'
+                                                    ,anim: 'up'
+                                                    ,style: 'position:fixed; bottom:0; left:0; width: 100%; height: 180px; padding:10px 0; border:none;'
+                                                  });
+                                            },
+                                            shadeClose: false,
+                                            fixed: false,
+                                            top: -400
+                                        });
+                                    }
+                                }, 300)
                             })
-                        }, 250)
+                        }, 400)
                     })
-                }, 50)
+                }, 0)
             })
         } else {
             let isMovable = this.checkMovable(this.state.cubes);
@@ -353,10 +373,10 @@ class Game extends PureComponent {
                 if (ele === '') {
                     return ele;
                 } else if (ele instanceof Array) {
-                    // 返回第一个元素，回收第二、三个元素的id到id池
+                    // 返回第三个元素，回收第二、三个元素的id到id池
+                    self.state.idPool.push(ele[0].id);
                     self.state.idPool.push(ele[1].id);
-                    self.state.idPool.push(ele[2].id);
-                    return ele[0]
+                    return ele[2]
                 } else if (ele instanceof Object) {
                     return ele;
                 } 
@@ -434,7 +454,7 @@ class Game extends PureComponent {
 
         // test
         // layer.open({
-        //     content: '恭喜你，获得最高学历：' + this.state.highestEducation,
+        //     content: '恭喜你，获得最高学历：' + '',
         //     btn: ['再挑战一次', '不要'],
         //     yes: function(index){
         //         location.reload();
@@ -448,10 +468,24 @@ class Game extends PureComponent {
         // if (true) {
         //     layer.open({
         //         content: '恭喜你获得博士后学位，真的太厉害了，祖国发光发热就靠你了~',
-        //         btn: ['再来一次', '去炫耀'],
+        //         btn: ['学霸请留步', '去炫耀'],
         //         yes: function(index){
-        //             location.reload();
-        //             layer.close(index);
+        //             layer.open({
+        //                 type: 1,
+        //                 className : 'invite',
+        //                 shade:'background-color: rgba(0,0,0,0)',
+        //                 btn: ['再玩一次', '不要'],
+        //                 yes: function() {
+        //                     location.reload();
+        //                 },
+        //                 no: function(index) {
+        //                     layer.close(index);
+        //                 },
+        //                 shadeClose: true,
+        //                 content: '相信您对教育有很深的认识，对各阶段也有自己的体会，如果可以，传达您的见解，一起丰富内容库，给学生生涯留个纪念吧~'
+        //                 ,anim: 'up'
+        //                 ,style: 'position:fixed; bottom:0; left:0; width: 100%; height: 180px; padding:10px 0; border:none;'
+        //               });
         //         },
         //         shadeClose: false,
         //         fixed: false,
